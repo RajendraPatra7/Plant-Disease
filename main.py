@@ -132,4 +132,4 @@ elif (app_mode == "Plant Disease Recognition"):
                       'Tomato___Tomato_mosaic_virus',
                       'Tomato___healthy']
 
-        st.success("Model is predicting that it can be {}".format(class_name[result_idx]))
+        st.success("Model is predicting that it can be {}".format(class_name[result_idx])) 
