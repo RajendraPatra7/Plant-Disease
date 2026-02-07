@@ -2,26 +2,59 @@ import streamlit as st
 import tensorflow as tf
 import numpy as np
 import base64
+import os
+
+st.set_page_config(page_title="Smart Spray X", page_icon="🌿", layout="centered")
+
+# Custom Styling
+st.markdown(
+    """
+    <style>
+    .main {background-color: #f5fff6;}
+    h1, h2, h3 {color: #1f6f3d;}
+    .stButton>button {
+        background-color: #1f6f3d;
+        color: white;
+        border-radius: 8px;
+        border: none;
+        padding: 8px 16px;
+        transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .stButton>button:hover {
+        background-color: #145a2c;
+        color: white;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    }
+    .uploadedFile {border: 2px dashed #1f6f3d; border-radius: 10px; padding: 10px;}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+@st.cache_resource
+def load_model():
+    if not os.path.exists('trained_model.keras'):
+        st.error("Model file 'trained_model.keras' not found in the current directory.")
+        return None
+    return tf.keras.models.load_model('trained_model.keras')
+
+model = load_model()
 
 #! Tensorflow Model Prediction
 
 
 def model_prediction(test_image):
-    # * Load the model
-    model = tf.keras.models.load_model('trained_model.keras')
+    if model is None:
+        return None, None
 
-    # * Image Preprocessing
     image = tf.keras.preprocessing.image.load_img(
         test_image, target_size=(128, 128))
     input_arr = tf.keras.preprocessing.image.img_to_array(image)
     input_arr = np.array([input_arr])  # Convert the single image to the batch
 
-    # * To get the prediction possibility array ~
     prediction = model.predict(input_arr)
-
-    # * To get the max possiblity array position
     result_idx = np.argmax(prediction)
-    return result_idx
+    return result_idx, prediction
 
 
 #! Creating the UI
@@ -36,8 +69,12 @@ if app_mode == "Home":
     st.header("SMART-SPRAY-X ~ AI-Driven Pesticide Optimization System")
     image_path = "Background_image.jpeg"
     st.image(image_path, use_container_width=True)
-    st.subheader(
-        "Intelligent Pesticide Sprinkling System Determined By The Infection Level of the Plant")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.info("🎯 Fast AI-based disease detection")
+    with col2:
+        st.info("💧 Optimized pesticide usage")
+    st.subheader("🌱 Intelligent Pesticide Sprinkling System Based on Infection Level")
 
     st.markdown("""
                 Welcome to the Plant Disease Recognition System! 🌿🔍
@@ -80,56 +117,72 @@ elif app_mode == "About":
 
 # * Recognition Page
 elif (app_mode == "Plant Disease Recognition"):
-    st.header("Plant Disease Recongnition ~")
+    st.header("🌿 Plant Disease Recognition")
+    st.markdown("Upload a clear image of a plant leaf to get an instant AI diagnosis.")
     test_image = st.file_uploader("Choose an Image")
+
+    # * Define Class
+    #TODO ~ we need to make the class names more appropriate
+    class_name = ['Apple___Apple_scab',
+                  'Apple___Black_rot',
+                  'Apple Cedar Rust',
+                  'Apple___healthy',
+                  'Blueberry___healthy',
+                  'Cherry_(including_sour)___Powdery_mildew',
+                  'Cherry_(including_sour)___healthy',
+                  'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot',
+                  'Corn_(maize)___Common_rust_',
+                  'Corn_(maize)___Northern_Leaf_Blight',
+                  'Corn_(maize)___healthy',
+                  'Grape___Black_rot',
+                  'Grape___Esca_(Black_Measles)',
+                  'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)',
+                  'Grape___healthy',
+                  'Orange___Haunglongbing_(Citrus_greening)',
+                  'Peach___Bacterial_spot',
+                  'Peach___healthy',
+                  'Pepper,_bell___Bacterial_spot',
+                  'Pepper,_bell___healthy',
+                  'Potato___Early_blight',
+                  'Potato___Late_blight',
+                  'Potato___healthy',
+                  'Raspberry___healthy',
+                  'Soybean___healthy',
+                  'Squash___Powdery_mildew',
+                  'Strawberry___Leaf_scorch',
+                  'Strawberry___healthy',
+                  'Tomato___Bacterial_spot',
+                  'Tomato___Early_blight',
+                  'Tomato___Late_blight',
+                  'Tomato___Leaf_Mold',
+                  'Tomato___Septoria_leaf_spot',
+                  'Tomato___Spider_mites Two-spotted_spider_mite',
+                  'Tomato___Target_Spot',
+                  'Tomato___Tomato_Yellow_Leaf_Curl_Virus',
+                  'Tomato___Tomato_mosaic_virus',
+                  'Tomato___healthy']
+
     if (st.button("Show Image")):
-        st.image(test_image, width='stretch')
+        if test_image is not None:
+            st.image(test_image, use_container_width=True, caption="Uploaded Leaf Image")
+        else:
+            st.warning("Please upload an image first.")
 
     # * Predcition button
     if (st.button("Predict")):
-        st.balloons()
-        st.write("Our Prediction :")
-        result_idx = model_prediction(test_image)
+        if test_image is None:
+            st.error("Please upload an image first!")
+        else:
+            with st.spinner("🔍 Analyzing the leaf..."):
+                result_idx, prediction = model_prediction(test_image)
 
-        # * Define Class
-        #TODO ~ we need to make the class names more appropriate
-        class_name = ['Apple___Apple_scab',
-                      'Apple___Black_rot',
-                      'Apple Cedar Rust',
-                      'Apple___healthy',
-                      'Blueberry___healthy',
-                      'Cherry_(including_sour)___Powdery_mildew',
-                      'Cherry_(including_sour)___healthy',
-                      'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot',
-                      'Corn_(maize)___Common_rust_',
-                      'Corn_(maize)___Northern_Leaf_Blight',
-                      'Corn_(maize)___healthy',
-                      'Grape___Black_rot',
-                      'Grape___Esca_(Black_Measles)',
-                      'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)',
-                      'Grape___healthy',
-                      'Orange___Haunglongbing_(Citrus_greening)',
-                      'Peach___Bacterial_spot',
-                      'Peach___healthy',
-                      'Pepper,_bell___Bacterial_spot',
-                      'Pepper,_bell___healthy',
-                      'Potato___Early_blight',
-                      'Potato___Late_blight',
-                      'Potato___healthy',
-                      'Raspberry___healthy',
-                      'Soybean___healthy',
-                      'Squash___Powdery_mildew',
-                      'Strawberry___Leaf_scorch',
-                      'Strawberry___healthy',
-                      'Tomato___Bacterial_spot',
-                      'Tomato___Early_blight',
-                      'Tomato___Late_blight',
-                      'Tomato___Leaf_Mold',
-                      'Tomato___Septoria_leaf_spot',
-                      'Tomato___Spider_mites Two-spotted_spider_mite',
-                      'Tomato___Target_Spot',
-                      'Tomato___Tomato_Yellow_Leaf_Curl_Virus',
-                      'Tomato___Tomato_mosaic_virus',
-                      'Tomato___healthy']
+            if result_idx is None:
+                st.error("Prediction failed because the model could not be loaded.")
+            else:
+                confidence = float(prediction[0][result_idx])
+                st.success(f"🌿 Diagnosis: {class_name[result_idx]}")
+                st.write(f"Confidence: {confidence*100:.2f}%")
+                st.progress(min(confidence, 1.0))
 
-        st.success("Model is predicting that it can be {}".format(class_name[result_idx])) 
+st.markdown("---")
+st.caption("Built with ❤️ using Streamlit | Smart-Spray-X")
