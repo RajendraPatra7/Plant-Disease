@@ -4,29 +4,301 @@ import numpy as np
 import base64
 import os
 
-st.set_page_config(page_title="Smart Spray X", page_icon="🌿", layout="centered")
+st.set_page_config(page_title="Smart Spray X", page_icon="🌿", layout="wide")
 
-# Custom Styling
+# Custom Styling - Premium Dark + Green Theme
 st.markdown(
     """
     <style>
-    .main {background-color: #f5fff6;}
-    h1, h2, h3 {color: #1f6f3d;}
+    /* Global Styles */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+    
+    * {
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Make text selection IMPOSSIBLE TO MISS */
+    ::selection {
+        background: #ffc107 !important;   /* bright yellow */
+        color: #000000 !important;        /* pure black text */
+    }
+    ::-moz-selection {
+        background: #ffc107 !important;
+        color: #000000 !important;
+    }
+
+    /* Make text cursor (caret) highly visible everywhere */
+    .main, p, div, span, h1, h2, h3, h4, li {
+        caret-color: #52b788 !important; /* bright green caret */
+    }
+    
+    /* Main Background with Gradient */
+    .main {
+        background: linear-gradient(135deg, #0a1f0f 0%, #0d1b2a 50%, #0a1f0f 100%);
+        color: #e8f5e9;
+    }
+    
+    /* Top Header Bar */
+    .top-header {
+        background: linear-gradient(90deg, #1a4d2e 0%, #2d6a4f 100%);
+        padding: 1rem 2rem;
+        border-bottom: 2px solid #40916c;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        margin-bottom: 2rem;
+    }
+    
+    .top-header h1 {
+        color: #ffffff;
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Sidebar Styling */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #1a4d2e 0%, #0d1b2a 100%);
+        border-right: 2px solid #40916c;
+    }
+    
+    [data-testid="stSidebar"] > div:first-child {
+        padding-top: 2rem;
+    }
+    
+    .sidebar-logo {
+        text-align: center;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        background: rgba(64, 145, 108, 0.1);
+        border-radius: 12px;
+        border: 2px solid #40916c;
+    }
+    
+    .sidebar-logo h2 {
+        color: #d8f3dc;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    [data-testid="stSidebar"] .stSelectbox label {
+        color: #d8f3dc !important;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    /* Headings */
+    h1, h2, h3, h4 {
+        color: #e8f5e9 !important;
+        font-weight: 700;
+    }
+
+    h1 {
+        font-size: 2.8rem !important;
+        color: #ffffff !important;
+        margin-bottom: 0.5rem !important;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    }
+
+    h2 {
+        font-size: 2rem !important;
+        color: #f8fff9 !important;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    }
+
+    h3 {
+        font-size: 1.5rem !important;
+        color: #f5fff6 !important;
+    }
+    h4 { color: #f5fff6 !important; }
+    
+    /* Subtext */
+    .subtitle {
+        font-size: 1.2rem;
+        color: #e6fff0;
+        margin-bottom: 3rem;
+        font-weight: 300;
+        text-align: center;
+    }
+    
+    /* Feature Cards */
+    .feature-card {
+        background: linear-gradient(135deg, rgba(26, 77, 46, 0.8) 0%, rgba(29, 53, 87, 0.6) 100%);
+        padding: 2rem;
+        border-radius: 16px;
+        border: 2px solid #40916c;
+        margin: 1rem 0;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(64, 145, 108, 0.4);
+        border-color: #52b788;
+    }
+    
+    .feature-card h3 {
+        color: #e8f5e9 !important;
+        font-size: 1.3rem !important;
+        margin-bottom: 0.8rem !important;
+    }
+    
+    .feature-card p {
+        color: #f5fff6;
+        font-size: 1rem;
+        line-height: 1.6;
+        font-weight: 500;
+    }
+    
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Info Cards (replacing st.info) */
+    .info-card {
+        background: linear-gradient(135deg, rgba(26, 77, 46, 0.6) 0%, rgba(13, 27, 42, 0.6) 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border-left: 4px solid #52b788;
+        margin: 1rem 0;
+        color: #f5fff6;
+        font-size: 1.15rem;
+        font-weight: 500;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .info-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(82, 183, 136, 0.5);
+    }
+    
+    /* Buttons */
     .stButton>button {
-        background-color: #1f6f3d;
-        color: white;
-        border-radius: 8px;
-        border: none;
-        padding: 8px 16px;
-        transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        background: linear-gradient(90deg, #2d6a4f 0%, #1b4332 100%);
+        color: #d8f3dc;
+        border-radius: 10px;
+        border: 2px solid #40916c;
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
+    
     .stButton>button:hover {
-        background-color: #145a2c;
-        color: white;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+        background: linear-gradient(90deg, #40916c 0%, #2d6a4f 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(64, 145, 108, 0.5);
+        border-color: #52b788;
     }
-    .uploadedFile {border: 2px dashed #1f6f3d; border-radius: 10px; padding: 10px;}
+    
+    .stButton>button:active {
+        transform: translateY(-1px);
+    }
+    
+    /* File Uploader */
+    [data-testid="stFileUploader"] {
+        background: rgba(26, 77, 46, 0.3);
+        border: 2px dashed #40916c;
+        border-radius: 16px;
+        padding: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    [data-testid="stFileUploader"]:hover {
+        border-color: #52b788;
+        background: rgba(26, 77, 46, 0.5);
+        box-shadow: 0 4px 15px rgba(64, 145, 108, 0.2);
+    }
+    
+    [data-testid="stFileUploader"] label {
+        color: #d8f3dc !important;
+        font-size: 1.1rem !important;
+        font-weight: 600;
+    }
+    
+    /* Progress Bar */
+    .stProgress > div > div {
+        background: linear-gradient(90deg, #52b788 0%, #2d6a4f 100%);
+    }
+    
+    /* Success/Error/Warning Messages */
+    .stSuccess {
+        background: linear-gradient(135deg, rgba(82, 183, 136, 0.2) 0%, rgba(45, 106, 79, 0.2) 100%);
+        border-left: 4px solid #52b788;
+        color: #d8f3dc !important;
+    }
+    
+    .stError {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.2) 0%, rgba(139, 0, 0, 0.2) 100%);
+        border-left: 4px solid #dc3545;
+        color: #ffcccc !important;
+    }
+    
+    .stWarning {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.2) 0%, rgba(255, 152, 0, 0.2) 100%);
+        border-left: 4px solid #ffc107;
+        color: #fff3cd !important;
+    }
+    
+    /* Markdown Content */
+    .markdown-text-container {
+        color: #1b4332;
+        line-height: 1.8;
+        font-size: 1.05rem;
+        caret-color: #52b788 !important;
+    }
+
+    /* Make all normal Streamlit markdown text visible on light backgrounds */
+    [data-testid="stMarkdown"] p,
+    [data-testid="stMarkdown"] li {
+        color: #1b4332 !important; /* dark readable green */
+    }
+    
+    /* Spinner */
+    .stSpinner > div {
+        border-top-color: #52b788 !important;
+    }
+    
+    /* Caption/Footer */
+    .caption-text {
+        text-align: center;
+        color: #f5fff6;
+        font-size: 0.95rem;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid #40916c;
+    }
+    
+    /* Hero Section */
+    .hero-section {
+        text-align: center;
+        padding: 3rem 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    /* Center Container */
+    .center-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
     </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+# Top Header Bar
+st.markdown(
+    """
+    <div class="top-header">
+        <h1>🌿 Smart Spray X</h1>
+    </div>
     """,
     unsafe_allow_html=True,
 )
@@ -58,68 +330,276 @@ def model_prediction(test_image):
 
 
 #! Creating the UI
-# * Sidebar
-st.sidebar.title("Dashboard")
+# * Sidebar with Logo
+st.sidebar.markdown(
+    """
+    <div class="sidebar-logo">
+        <h2>🌿 Smart Spray X</h2>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.sidebar.markdown("### Navigation")
 app_mode = st.sidebar.selectbox(
     "Select Page", ["Home", "About", "Plant Disease Recognition"])
+
+# Scroll to top when page changes
+if 'last_page' not in st.session_state:
+    st.session_state.last_page = app_mode
+
+if st.session_state.last_page != app_mode:
+    st.session_state.last_page = app_mode
+    # JavaScript to scroll to top
+    st.markdown(
+        """
+        <script>
+        setTimeout(() => {
+            const mainSection = window.parent.document.querySelector('section.main');
+            if (mainSection) mainSection.scrollTop = 0;
+        }, 50);
+        </script>
+        """,
+        unsafe_allow_html=True,
+    )
+
+st.sidebar.markdown("---")
+st.sidebar.markdown(
+    """
+    <div style="padding: 1rem; color: #95d5b2; font-size: 0.9rem;">
+        <p><strong>Powered by:</strong></p>
+        <p>🤖 TensorFlow AI</p>
+        <p>🎯 Smart Detection</p>
+        <p>💧 Optimized Spray</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 # * Home Page
 
 if app_mode == "Home":
-    st.header("SMART-SPRAY-X ~ AI-Driven Pesticide Optimization System")
+    # Hero Section
+    st.markdown(
+        """
+        <div class="hero-section">
+            <h1>AI-Driven Pesticide Optimization System</h1>
+            <p class="subtitle">Intelligent disease detection and optimized pesticide application for healthier crops</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    
+    # Background Image
     image_path = "Background_image.jpeg"
-    st.image(image_path, use_container_width=True)
+    if os.path.exists(image_path):
+        st.image(image_path, use_container_width=True)
+    
+    # Feature Cards in 3 columns
+    st.markdown("<br>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown(
+            """
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Fast AI Detection</h3>
+                <p>Instant disease identification using state-of-the-art deep learning models</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    
+    with col2:
+        st.markdown(
+            """
+            <div class="feature-card">
+                <div class="feature-icon">💧</div>
+                <h3>Optimized Spray</h3>
+                <p>Precise pesticide application based on infection severity levels</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    
+    with col3:
+        st.markdown(
+            """
+            <div class="feature-card">
+                <div class="feature-icon">🌱</div>
+                <h3>Eco-Friendly</h3>
+                <p>Reduce chemical waste and promote sustainable farming practices</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    # Welcome Section
+    st.markdown("## Welcome to Smart Spray X 🌿🔍")
+    st.markdown(
+        """
+        <div class="markdown-text-container">
+        Our mission is to help in identifying plant diseases efficiently. Upload an image of a plant, 
+        and our system will analyze it to detect any signs of diseases. Together, let's protect our crops 
+        and ensure a healthier harvest!
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # How It Works
+    st.markdown("### How It Works")
+    st.markdown(
+        """
+        <div class="info-card">
+            <strong>1. Upload Image</strong><br>
+            Go to the <strong>Disease Recognition</strong> page and upload an image of a plant with suspected diseases.
+        </div>
+        <div class="info-card">
+            <strong>2. AI Analysis</strong><br>
+            Our system will process the image using advanced algorithms to identify potential diseases.
+        </div>
+        <div class="info-card">
+            <strong>3. Get Results</strong><br>
+            View the results and recommendations for further action within seconds.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Why Choose Us
+    st.markdown("### Why Choose Us?")
     col1, col2 = st.columns(2)
     with col1:
-        st.info("🎯 Fast AI-based disease detection")
+        st.markdown(
+            """
+            <div class="info-card">
+                ✅ <strong>Accuracy:</strong> State-of-the-art ML techniques for precise disease detection
+            </div>
+            <div class="info-card">
+                ✅ <strong>User-Friendly:</strong> Simple and intuitive interface for seamless experience
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
     with col2:
-        st.info("💧 Optimized pesticide usage")
-    st.subheader("🌱 Intelligent Pesticide Sprinkling System Based on Infection Level")
-
-    st.markdown("""
-                Welcome to the Plant Disease Recognition System! 🌿🔍
+        st.markdown(
+            """
+            <div class="info-card">
+                ✅ <strong>Fast & Efficient:</strong> Receive results in seconds for quick decision-making
+            </div>
+            <div class="info-card">
+                ✅ <strong>Sustainable:</strong> Optimize pesticide use and reduce environmental impact
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
     
-    Our mission is to help in identifying plant diseases efficiently. Upload an image of a plant, and our system will analyze it to detect any signs of diseases. Together, let's protect our crops and ensure a healthier harvest!
-
-    ### How It Works
-    1. **Upload Image:** Go to the **Disease Recognition** page and upload an image of a plant with suspected diseases.
-    2. **Analysis:** Our system will process the image using advanced algorithms to identify potential diseases.
-    3. **Results:** View the results and recommendations for further action.
-
-    ### Why Choose Us?
-    - **Accuracy:** Our system utilizes state-of-the-art machine learning techniques for accurate disease detection.
-    - **User-Friendly:** Simple and intuitive interface for seamless user experience.
-    - **Fast and Efficient:** Receive results in seconds, allowing for quick decision-making.
-
-    ### Get Started
-    Click on the **Disease Recognition** page in the sidebar to upload an image and experience the power of our Plant Disease Recognition System!
-
-    ### About Us
-    Learn more about the project, our team, and our goals on the **About** page.
-                """)
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Get Started CTA
+    st.markdown("### Get Started")
+    st.markdown(
+        """
+        <div class="markdown-text-container">
+        Click on the <strong>Plant Disease Recognition</strong> page in the sidebar to upload an image 
+        and experience the power of our AI-driven system!
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 # * About Page
 elif app_mode == "About":
-    st.header("About")
-    st.markdown("""
-                #### About Dataset
-                This dataset is recreated using offline augmentation from the original dataset.The original dataset can be found on this github repo.
-                This dataset consists of about 87K rgb images of healthy and diseased crop leaves which is categorized into 38 different classes.The total dataset is divided into 80/20 ratio of training and validation set preserving the directory structure.
-                A new directory containing 33 test images is created later for prediction purpose.
-                #### Content
-                1. train (70295 images)
-                2. test (33 images)
-                3. validation (17572 images
-                """)
+    st.markdown("# About Smart Spray X")
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    st.markdown("## About the Dataset")
+    st.markdown(
+        """
+        <div class="info-card">
+            This dataset is recreated using offline augmentation from the original dataset. 
+            It consists of about <strong>87K RGB images</strong> of healthy and diseased crop leaves 
+            categorized into <strong>38 different classes</strong>.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    st.markdown("### Dataset Content")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown(
+            """
+            <div class="feature-card">
+                <div class="feature-icon">📁</div>
+                <h3>Training Set</h3>
+                <p>70,295 images</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col2:
+        st.markdown(
+            """
+            <div class="feature-card">
+                <div class="feature-icon">🧪</div>
+                <h3>Test Set</h3>
+                <p>33 images</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col3:
+        st.markdown(
+            """
+            <div class="feature-card">
+                <div class="feature-icon">✅</div>
+                <h3>Validation Set</h3>
+                <p>17,572 images</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    st.markdown(
+        """
+        <div class="markdown-text-container">
+        The total dataset is divided into an <strong>80/20 ratio</strong> of training and validation sets, 
+        preserving the directory structure. A new directory containing test images was created for prediction purposes.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     # TODO : here the detials about out team is needed to be inserted when it is ready for its final build .
 
 
 # * Recognition Page
 elif (app_mode == "Plant Disease Recognition"):
-    st.header("🌿 Plant Disease Recognition")
-    st.markdown("Upload a clear image of a plant leaf to get an instant AI diagnosis.")
-    test_image = st.file_uploader("Choose an Image")
+    st.markdown("# 🌿 Plant Disease Recognition")
+    st.markdown(
+        """
+        <p class="subtitle">Upload a clear image of a plant leaf to get an instant AI diagnosis</p>
+        """,
+        unsafe_allow_html=True,
+    )
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # File Uploader Section
+    test_image = st.file_uploader("Choose an Image", type=["jpg", "jpeg", "png"])
 
     # * Define Class
     #TODO ~ we need to make the class names more appropriate
@@ -161,28 +641,59 @@ elif (app_mode == "Plant Disease Recognition"):
                   'Tomato___Tomato_Yellow_Leaf_Curl_Virus',
                   'Tomato___Tomato_mosaic_virus',
                   'Tomato___healthy']
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Action Buttons
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        show_image_btn = st.button("🖼️ Show Image", use_container_width=True)
+    with col2:
+        predict_btn = st.button("🔍 Predict Disease", use_container_width=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    if (st.button("Show Image")):
+    if show_image_btn:
         if test_image is not None:
             st.image(test_image, use_container_width=True, caption="Uploaded Leaf Image")
         else:
-            st.warning("Please upload an image first.")
+            st.warning("⚠️ Please upload an image first.")
 
     # * Predcition button
-    if (st.button("Predict")):
+    if predict_btn:
         if test_image is None:
-            st.error("Please upload an image first!")
+            st.error("❌ Please upload an image first!")
         else:
             with st.spinner("🔍 Analyzing the leaf..."):
                 result_idx, prediction = model_prediction(test_image)
 
             if result_idx is None:
-                st.error("Prediction failed because the model could not be loaded.")
+                st.error("❌ Prediction failed because the model could not be loaded.")
             else:
                 confidence = float(prediction[0][result_idx])
-                st.success(f"🌿 Diagnosis: {class_name[result_idx]}")
-                st.write(f"Confidence: {confidence*100:.2f}%")
+                
+                # Display Results in a nice card
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.success(f"✅ Diagnosis: **{class_name[result_idx]}**")
+                st.markdown(
+                    f"""
+                    <div class="feature-card">
+                        <h3>Confidence Score</h3>
+                        <p style="font-size: 2rem; font-weight: 700; color: #52b788;">{confidence*100:.2f}%</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
                 st.progress(min(confidence, 1.0))
 
+# Footer
+st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown("---")
-st.caption("Built with ❤️ using Streamlit | Smart-Spray-X")
+st.markdown(
+    """
+    <div class="caption-text">
+        Built with ❤️ using Streamlit | Smart Spray X © 2026
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
