@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 import base64
 import os
+import streamlit.components.v1 as components
 
 st.set_page_config(page_title="Smart Spray X", page_icon="🌿", layout="wide")
 
@@ -127,6 +128,20 @@ st.markdown(
         color: #d8f3dc !important;
         font-weight: 600;
         font-size: 1.1rem;
+    }
+
+    [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
+        cursor: pointer !important;
+        caret-color: transparent !important;
+    }
+
+    [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] * {
+        cursor: pointer !important;
+        caret-color: transparent !important;
+    }
+
+    [data-testid="stSidebar"] .stSelectbox input {
+        caret-color: transparent !important;
     }
     
     /* Headings */
@@ -327,8 +342,14 @@ st.markdown(
     /* Hero Section */
     .hero-section {
         text-align: center;
-        padding: 3rem 1rem;
-        margin-bottom: 2rem;
+        padding: 1rem 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Hide components iframe gap */
+    iframe[title="st.iframe"],
+    iframe[title="streamlit_component"] {
+        display: none !important;
     }
     
     /* Center Container */
@@ -400,17 +421,30 @@ if 'last_page' not in st.session_state:
 
 if st.session_state.last_page != app_mode:
     st.session_state.last_page = app_mode
-    # JavaScript to scroll to top
-    st.markdown(
+    # Brute-force scroll to top - reset ALL scrollable elements
+    components.html(
         """
         <script>
-        setTimeout(() => {
-            const mainSection = window.parent.document.querySelector('section.main');
-            if (mainSection) mainSection.scrollTop = 0;
-        }, 50);
+        function forceScrollTop() {
+            // Reset every scrollable element in the parent document
+            const doc = window.parent.document;
+            const allElements = doc.querySelectorAll('*');
+            allElements.forEach(el => {
+                if (el.scrollTop > 0) {
+                    el.scrollTop = 0;
+                }
+            });
+            // Also try scrollIntoView on the very first element
+            const firstHeader = doc.querySelector('[data-testid="stHeader"]');
+            if (firstHeader) firstHeader.scrollIntoView({behavior: 'instant', block: 'start'});
+            window.parent.scrollTo(0, 0);
+        }
+        forceScrollTop();
+        let c = 0;
+        const iv = setInterval(() => { forceScrollTop(); if (++c >= 15) clearInterval(iv); }, 100);
         </script>
         """,
-        unsafe_allow_html=True,
+        height=0,
     )
 
 st.sidebar.markdown("---")
@@ -621,7 +655,7 @@ if app_mode == "Home":
 
 # * About Page
 elif app_mode == "About":
-    st.markdown("# About Smart Spray X")
+    st.markdown("<h1 style='text-align: center;'>About Smart Spray X</h1>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
     
     st.markdown("## About the Dataset")
