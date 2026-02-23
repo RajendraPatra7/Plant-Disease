@@ -11,7 +11,7 @@ st.markdown(
     """
     <style>
     /* Global Styles */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@700;900&display=swap');
     
     * {
         font-family: 'Inter', sans-serif;
@@ -38,22 +38,63 @@ st.markdown(
         color: #e8f5e9;
     }
     
+    /* Header glow animation */
+    @keyframes headerGlow {
+        0%, 100% { box-shadow: 0 4px 20px rgba(64, 145, 108, 0.4), 0 0 30px rgba(82, 183, 136, 0.1); }
+        50% { box-shadow: 0 4px 30px rgba(64, 145, 108, 0.6), 0 0 50px rgba(82, 183, 136, 0.2); }
+    }
+
+    @keyframes textShimmer {
+        0% { background-position: -200% center; }
+        100% { background-position: 200% center; }
+    }
+
     /* Top Header Bar */
     .top-header {
-        background: linear-gradient(90deg, #1a4d2e 0%, #2d6a4f 100%);
-        padding: 1rem 2rem;
-        border-bottom: 2px solid #40916c;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(135deg, #0d2818 0%, #1a4d2e 30%, #2d6a4f 60%, #1a4d2e 100%);
+        padding: 2rem 2rem 1.5rem 2rem;
+        border: 2px solid #52b788;
+        border-radius: 16px;
         margin-bottom: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        animation: headerGlow 3s ease-in-out 0.3s infinite;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .top-header::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%; right: 0; bottom: 0;
+        width: 300%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+        animation: textShimmer 5s linear infinite;
     }
     
     .top-header h1 {
-        color: #ffffff;
-        font-size: 2rem;
-        font-weight: 700;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 2.8rem;
+        font-weight: 900;
+        margin: 0 0 0.4rem 0;
+        letter-spacing: 6px;
+        text-transform: uppercase;
+        background: linear-gradient(90deg, #d8f3dc, #ffffff, #95d5b2, #ffffff, #d8f3dc);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: textShimmer 4s linear infinite;
+        position: relative;
+    }
+
+    .top-header .header-tagline {
+        color: #95d5b2;
+        font-size: 0.95rem;
+        font-weight: 400;
+        letter-spacing: 2px;
         margin: 0;
-        letter-spacing: 1px;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        position: relative;
     }
     
     /* Sidebar Styling */
@@ -90,38 +131,43 @@ st.markdown(
     
     /* Headings */
     h1, h2, h3, h4 {
-        color: #e8f5e9 !important;
+        color: #1b4332 !important;
         font-weight: 700;
     }
 
     h1 {
         font-size: 2.8rem !important;
-        color: #ffffff !important;
+        color: #1b4332 !important;
         margin-bottom: 0.5rem !important;
-        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
     }
 
     h2 {
         font-size: 2rem !important;
-        color: #f8fff9 !important;
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        color: #2d6a4f !important;
     }
 
     h3 {
         font-size: 1.5rem !important;
-        color: #f5fff6 !important;
+        color: #2d6a4f !important;
     }
-    h4 { color: #f5fff6 !important; }
+    h4 { color: #2d6a4f !important; }
     
     /* Subtext */
     .subtitle {
         font-size: 1.2rem;
-        color: #e6fff0;
+        color: #40916c;
         margin-bottom: 3rem;
-        font-weight: 300;
+        font-weight: 400;
         text-align: center;
     }
     
+    /* Float animation keyframe */
+    @keyframes floatBob {
+        0%   { transform: translateY(0px) scale(1.05); }
+        50%  { transform: translateY(-8px) scale(1.05); }
+        100% { transform: translateY(0px) scale(1.05); }
+    }
+
     /* Feature Cards */
     .feature-card {
         background: linear-gradient(135deg, rgba(26, 77, 46, 0.8) 0%, rgba(29, 53, 87, 0.6) 100%);
@@ -130,14 +176,16 @@ st.markdown(
         border: 2px solid #40916c;
         margin: 1rem 0;
         text-align: center;
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        cursor: pointer;
     }
     
     .feature-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(64, 145, 108, 0.4);
+        transform: translateY(-10px) scale(1.05);
+        box-shadow: 0 12px 35px rgba(64, 145, 108, 0.5), 0 0 20px rgba(82, 183, 136, 0.2);
         border-color: #52b788;
+        animation: floatBob 2s ease-in-out 0.3s infinite;
     }
     
     .feature-card h3 {
@@ -268,8 +316,9 @@ st.markdown(
     /* Caption/Footer */
     .caption-text {
         text-align: center;
-        color: #f5fff6;
+        color: #1b4332;
         font-size: 0.95rem;
+        font-weight: 500;
         margin-top: 3rem;
         padding-top: 2rem;
         border-top: 1px solid #40916c;
@@ -298,6 +347,7 @@ st.markdown(
     """
     <div class="top-header">
         <h1>🌿 Smart Spray X</h1>
+        <p class="header-tagline">AI-Driven Pesticide Optimization &amp; Plant Disease Detection</p>
     </div>
     """,
     unsafe_allow_html=True,
@@ -515,6 +565,58 @@ if app_mode == "Home":
         """,
         unsafe_allow_html=True,
     )
+    
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    # Stats Section
+    st.markdown("### 📊 By The Numbers")
+    col1, col2, col3, col4 = st.columns(4)
+    
+    stats = [
+        ("🌿", "38", "Disease Classes"),
+        ("📸", "87K+", "Training Images"),
+        ("🎯", "95%+", "Accuracy"),
+        ("⚡", "<2s", "Detection Speed"),
+    ]
+    
+    for col, (icon, number, label) in zip([col1, col2, col3, col4], stats):
+        with col:
+            st.markdown(
+                f"""
+                <div class="feature-card" style="padding: 1.5rem 1rem;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">{icon}</div>
+                    <div style="font-size: 2rem; font-weight: 800; color: #52b788; margin-bottom: 0.3rem;">{number}</div>
+                    <p style="font-size: 0.95rem; margin: 0;">{label}</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Tech Stack Section
+    st.markdown("### 🛠️ Powered By")
+    col1, col2, col3, col4 = st.columns(4)
+    
+    techs = [
+        ("🧠", "TensorFlow", "Deep Learning Engine"),
+        ("🖥️", "Streamlit", "Interactive Web UI"),
+        ("🐍", "Python", "Core Language"),
+        ("📷", "OpenCV", "Image Processing"),
+    ]
+    
+    for col, (icon, name, desc) in zip([col1, col2, col3, col4], techs):
+        with col:
+            st.markdown(
+                f"""
+                <div class="feature-card" style="padding: 1.5rem 1rem;">
+                    <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">{icon}</div>
+                    <h3 style="font-size: 1.1rem !important; margin-bottom: 0.3rem !important;">{name}</h3>
+                    <p style="font-size: 0.85rem; margin: 0; opacity: 0.85;">{desc}</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
 
 # * About Page
@@ -687,8 +789,7 @@ elif (app_mode == "Plant Disease Recognition"):
                 st.progress(min(confidence, 1.0))
 
 # Footer
-st.markdown("<br><br>", unsafe_allow_html=True)
-st.markdown("---")
+st.markdown("<br>", unsafe_allow_html=True)
 st.markdown(
     """
     <div class="caption-text">
