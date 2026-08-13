@@ -23,7 +23,7 @@ app = FastAPI(
 allowed_origins = [
     "http://localhost:5173",                        # Vite dev server
     "http://localhost:3000",                        # Alt dev port
-    "https://plant-disease-ruby-ten.vercel.app",   # Production frontend
+    "https://smartspray-x.vercel.app",              # Production frontend
 ]
 
 # Also read from FRONTEND_URL env variable (set in Render dashboard)

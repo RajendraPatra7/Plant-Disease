@@ -13,7 +13,7 @@
 
 | Service | URL |
 |---|---|
-| 🖥️ **Frontend** (React + Vite) | [plant-disease-ruby-ten.vercel.app](https://plant-disease-ruby-ten.vercel.app) |
+| 🖥️ **Frontend** (React + Vite) | [smartspray-x.vercel.app](https://smartspray-x.vercel.app) |
 | ⚙️ **Backend API** (FastAPI) | [plant-disease-9v9x.onrender.com](https://plant-disease-9v9x.onrender.com) |
 | 📄 **API Docs** (Swagger) | [plant-disease-9v9x.onrender.com/docs](https://plant-disease-9v9x.onrender.com/docs) |
 | 💚 **Health Check** | [/api/v1/health](https://plant-disease-9v9x.onrender.com/api/v1/health) |
@@ -36,7 +36,7 @@ This **"Spot-Spray"** approach drastically reduces chemical usage, lowers costs 
 ┌─────────────────────────────────────────────────────────────┐
 │                        User Browser                          │
 │                     (Vercel - React + Vite)                   │
-│         https://plant-disease-ruby-ten.vercel.app            │
+│             https://smartspray-x.vercel.app                  │
 └─────────────────────────┬───────────────────────────────────┘
                           │  REST API (HTTPS)
                           ▼
