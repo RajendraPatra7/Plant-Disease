@@ -4,6 +4,8 @@ import numpy as np
 import base64
 import os
 import streamlit.components.v1 as components
+import cv2
+from PIL import Image
 
 st.set_page_config(page_title="Smart Spray X", page_icon="🌿", layout="wide")
 
@@ -386,18 +388,78 @@ model = load_model()
 #! Tensorflow Model Prediction
 
 
+def rgb_to_hsv_numpy(rgb_array):
+    rgb = rgb_array.astype(np.float32) / 255.0
+    r, g, b = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
+    
+    max_c = np.max(rgb, axis=2)
+    min_c = np.min(rgb, axis=2)
+    delta = max_c - min_c
+    
+    h = np.zeros_like(max_c)
+    mask_delta = delta > 1e-5
+    
+    mask_r = mask_delta & (max_c == r)
+    h[mask_r] = ((g[mask_r] - b[mask_r]) / (delta[mask_r] + 1e-8)) % 6.0
+    
+    mask_g = mask_delta & (max_c == g)
+    h[mask_g] = ((b[mask_g] - r[mask_g]) / (delta[mask_g] + 1e-8)) + 2.0
+    
+    mask_b = mask_delta & (max_c == b)
+    h[mask_b] = ((r[mask_b] - g[mask_b]) / (delta[mask_b] + 1e-8)) + 4.0
+    
+    h = (h * 60.0) % 360.0
+    s = np.zeros_like(max_c)
+    s[max_c > 1e-5] = delta[max_c > 1e-5] / max_c[max_c > 1e-5]
+    v = max_c
+    
+    return h, s, v
+
+def validate_leaf_image_streamlit(pil_image, prediction):
+    img_rgb = np.array(pil_image.convert('RGB'))
+    h, s, v = rgb_to_hsv_numpy(img_rgb)
+
+    mask_green = (h >= 65) & (h <= 165) & (s >= 0.15) & (v >= 0.15)
+    mask_brown = (h >= 20) & (h < 65) & (s >= 0.15) & (v >= 0.15)
+
+    foliage_mask = mask_green | mask_brown
+    total_pixels = float(img_rgb.shape[0] * img_rgb.shape[1])
+    foliage_pixels = float(np.sum(foliage_mask))
+    foliage_ratio = foliage_pixels / total_pixels
+
+    sorted_probs = np.sort(prediction[0])[::-1]
+    top1 = float(sorted_probs[0])
+    top2 = float(sorted_probs[1]) if len(sorted_probs) > 1 else 0.0
+    margin = top1 - top2
+
+    if foliage_ratio < 0.12:
+        return False, f"⚠️ Invalid Image: The uploaded photo does not appear to be a crop leaf (Foliage coverage: {round(foliage_ratio * 100, 1)}% is below 12% minimum threshold)."
+
+    if top1 < 0.65:
+        return False, f"⚠️ Uncertain Diagnosis: Model confidence ({round(top1 * 100, 1)}%) is below 65% minimum threshold for a valid crop leaf."
+
+    if margin < 0.10:
+        return False, f"⚠️ Ambiguous Image: Model prediction is split across multiple classes (Margin: {round(margin * 100, 1)}%). Please upload a clearer leaf photo."
+
+    return True, "Valid leaf image."
+
 def model_prediction(test_image):
     if model is None:
-        return None, None
+        return None, None, False, "Model file not loaded."
 
+    pil_img = Image.open(test_image)
     image = tf.keras.preprocessing.image.load_img(
         test_image, target_size=(128, 128))
     input_arr = tf.keras.preprocessing.image.img_to_array(image)
     input_arr = np.array([input_arr])  # Convert the single image to the batch
 
     prediction = model.predict(input_arr)
+    is_valid, msg = validate_leaf_image_streamlit(pil_img, prediction)
+    if not is_valid:
+        return None, prediction, False, msg
+
     result_idx = np.argmax(prediction)
-    return result_idx, prediction
+    return result_idx, prediction, True, "Valid leaf image."
 
 
 #! Creating the UI
@@ -800,9 +862,11 @@ elif (app_mode == "Plant Disease Recognition"):
             st.error("❌ Please upload an image first!")
         else:
             with st.spinner("🔍 Analyzing the leaf..."):
-                result_idx, prediction = model_prediction(test_image)
+                result_idx, prediction, is_valid, msg = model_prediction(test_image)
 
-            if result_idx is None:
+            if not is_valid:
+                st.warning(msg)
+            elif result_idx is None:
                 st.error("❌ Prediction failed because the model could not be loaded.")
             else:
                 confidence = float(prediction[0][result_idx])
