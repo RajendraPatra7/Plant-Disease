@@ -3,10 +3,22 @@
 > **A Solution for Smart India Hackathon 2025**  
 > *Empowering Farmers with Intelligent Disease Detection*
 
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python&logoColor=white)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-2.10-orange?style=for-the-badge&logo=tensorflow&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-App-red?style=for-the-badge&logo=streamlit&logoColor=white)
-![Status](https://img.shields.io/badge/Status-Completed-success?style=for-the-badge)
+![Python](https://img.shields.io/badge/Python-3.10-blue?style=for-the-badge&logo=python&logoColor=white)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.13-orange?style=for-the-badge&logo=tensorflow&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Live-success?style=for-the-badge)
+
+## 🌐 Live Demo
+
+| Service | URL |
+|---|---|
+| 🖥️ **Frontend** (React + Vite) | [plant-disease-ruby-ten.vercel.app](https://plant-disease-ruby-ten.vercel.app) |
+| ⚙️ **Backend API** (FastAPI) | [plant-disease-9v9x.onrender.com](https://plant-disease-9v9x.onrender.com) |
+| 📄 **API Docs** (Swagger) | [plant-disease-9v9x.onrender.com/docs](https://plant-disease-9v9x.onrender.com/docs) |
+| 💚 **Health Check** | [/api/v1/health](https://plant-disease-9v9x.onrender.com/api/v1/health) |
+
+> ⚠️ **Note**: Backend is hosted on Render free tier — first request after inactivity may take ~30-45 seconds to wake up.
 
 ## 📖 Overview
 **SMART-SPRAY-X** is an AI-driven initiative for **Precision Agriculture**, specifically targeted for the **Smart India Hackathon 2025**. It addresses the critical issue of indiscriminate pesticide use by farmers.
@@ -18,79 +30,97 @@ Unlike traditional methods where pesticides are sprayed uniformly, **SMART-SPRAY
 
 This **"Spot-Spray"** approach drastically reduces chemical usage, lowers costs for farmers, and protects the environment from toxic residue.
 
-## 💡 Solution Concept
-*Optimization of Pesticide Sprinkling based on Infection Level*
+## 🏗️ Architecture
 
-1. **Input**: Farmer captures an image of the crop leaf via the app.
-2. **Diagnosis**: The CNN model identifies the specific disease (or confirms the plant is healthy).
-3. **Action**: The system (in its full deployment) would interface with a smart sprayer to release pesticide *only* on infected areas and in *optimal* quantities.
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        User Browser                          │
+│                     (Vercel - React + Vite)                   │
+│         https://plant-disease-ruby-ten.vercel.app            │
+└─────────────────────────┬───────────────────────────────────┘
+                          │  REST API (HTTPS)
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     FastAPI Backend                           │
+│                 (Render - Docker Container)                   │
+│        https://plant-disease-9v9x.onrender.com               │
+│                                                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐   │
+│  │ Leaf          │  │ CNN Model    │  │ Pesticide         │   │
+│  │ Validator     │  │ (38 classes) │  │ Recommendations   │   │
+│  │ (HSV + OOD)   │  │ TF/Keras     │  │ Spot-Spray Engine │   │
+│  └──────────────┘  └──────────────┘  └──────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
 
-
-## 🚀 Key Features
-- **🌿 Multi-Class Detection**: Capable of identifying **38 different plant diseases** across various crop species (Apple, Corn, Grape, Potato, Tomato, etc.).
-- **⚡ High Accuracy**: Powered by a robust **Convolutional Neural Network (CNN)** achieving **~96% accuracy** on validation data.
-- **📊 Interactive Dashboard**: A user-friendly interface built with **Streamlit** for seamless image uploading and real-time prediction.
-- **📈 Data-Driven**: Trained on a comprehensive dataset of over **87,000 images**.
+## 🛡️ Key Features
+- **🌿 Multi-Class Detection**: Identifies **38 different plant diseases** across crops (Apple, Corn, Grape, Potato, Tomato, etc.)
+- **⚡ High Accuracy**: CNN achieving **~96% accuracy** on validation data
+- **🛑 Non-Leaf Rejection**: Pure NumPy HSV foliage analysis + confidence thresholding rejects non-leaf images (cars, text, etc.)
+- **💊 Pesticide Recommendations**: Spot-spray optimization for each disease class
+- **📊 Interactive UI**: Glassmorphism dark emerald React frontend with drag & drop upload
+- **📈 Data-Driven**: Trained on **87,000+ images**
 
 ## 🛠️ Technology Stack
-- **Deep Learning**: TensorFlow, Keras
-- **Web Framework**: Streamlit
-- **Data Processing**: NumPy, Pandas
-- **Visualization**: Matplotlib, Seaborn
-- **Image Processing**: Librosa (for specific feature extraction), PIL
+
+| Layer | Technology |
+|---|---|
+| **Frontend** | React 18, Vite, Lucide Icons |
+| **Backend** | FastAPI, Uvicorn, Python 3.10 |
+| **AI/ML** | TensorFlow/Keras (CNN), NumPy |
+| **Deployment** | Vercel (Frontend), Render + Docker (Backend) |
+| **Image Processing** | PIL, Pure NumPy HSV |
 
 ## 📂 Dataset Details
-The model is trained on a large-scale dataset consisting of 87K RGB images of healthy and diseased crop leaves.
-- **Total Images**: ~87,000
-- **Classes**: 38 (Including Apple Scab, Black Rot, Late Blight, etc.)
+- **Total Images**: ~87,000 RGB
+- **Classes**: 38 (Apple Scab, Black Rot, Late Blight, etc.)
+- **Input Size**: 128×128×3
 - **Split**: 80% Training / 20% Validation
 
-## ⚙️ Installation & Usage
+## ⚙️ Local Development
 
-Follow these steps to set up the project locally:
+### Backend
+```bash
+cd "Plant Disease"
+conda activate tensorflow
+python start_backend.py
+# → http://localhost:8000
+```
 
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/your-username/smart-spray-x.git
-   cd "Plant Disease"
-   ```
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+# → http://localhost:5173
+```
 
-2. **Create a Virtual Environment (Optional but Recommended)**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-   ```
-
-3. **Install Dependencies**
-   ```bash
-   pip install -r requirement.txt
-   ```
-
-4. **Run the Application**
-   ```bash
-   streamlit run main.py
-   ```
-
-5. **Access the App**
-   The application will open automatically in your browser at `http://localhost:8501`.
-
-## 📸 How It Works
-1. **Upload**: Navigate to the **"Plant Disease Recognition"** page and upload an image of a suspected plant leaf.
-2. **Analyze**: The system processes the image using the pre-trained CNN model.
-3. **Result**: The predicted disease class is displayed along with confidence metrics.
+### API Endpoints
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/v1/health` | Health check + model status |
+| `POST` | `/api/v1/predict` | Upload leaf image → disease prediction |
+| `GET` | `/api/v1/classes` | List all 38 disease classes |
+| `GET` | `/docs` | Swagger API documentation |
 
 ## 🧠 Model Architecture
-The core is a trainable **Convolutional Neural Network (CNN)** optimized for image classification:
-- **Input Layer**: Accepts 128x128 RGB images.
-- **Feature Extraction**: Successive Conv2D + MaxPooling layers with ReLU activation to capture textures and patterns (spots, lesions).
-- **Classification**: Dense layers with Dropout (to prevent overfitting) leading to a Softmax output layer for 38 classes.
-- **Optimizer**: Adam (Adaptive Moment Estimation) for fast convergence.
+- **Input Layer**: 128×128 RGB images
+- **Feature Extraction**: Conv2D + MaxPooling with ReLU activation
+- **Classification**: Dense layers with Dropout → Softmax (38 classes)
+- **Optimizer**: Adam
+- **Model Size**: 13MB (`.keras` format)
+
+## 📸 How It Works
+1. **Upload**: Drag & drop a leaf image on the React frontend
+2. **Validate**: HSV foliage analysis rejects non-leaf images (< 12% foliage coverage)
+3. **Predict**: CNN classifies the disease with confidence scoring
+4. **Recommend**: Spot-spray pesticide recommendation displayed
 
 ## 🔮 Future Roadmap
-- [ ] **Severity Estimation**: quantifying the infection level (Mild/Moderate/Severe) to calculate precise pesticide dosage.
-- [ ] **Clean Class Names**: Mapping raw dataset labels (e.g., `Corn_(maize)___healthy`) to user-friendly names (e.g., `Corn - Healthy`).
-- [ ] **Hardware Integration**: Connecting the detection module with nozzle control systems for automated drones or sprayers.
-- [ ] **Multilingual Support**: Adding regional languages for wider accessibility to farmers across India.
+- [ ] **Severity Estimation**: Quantifying infection level (Mild/Moderate/Severe) for precise pesticide dosage
+- [ ] **Hardware Integration**: Connecting with nozzle control systems for automated drones/sprayers
+- [ ] **Multilingual Support**: Adding regional languages for wider accessibility across India
+- [ ] **Offline Mode**: PWA support for areas with limited connectivity
 
 ## 👥 Team
 **Smart India Hackathon 2025 Participant**  
