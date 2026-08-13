@@ -4,6 +4,8 @@ import ImageUploader from './components/ImageUploader';
 import ResultCard from './components/ResultCard';
 import { Target, Droplets, Leaf, Shield, Cpu, Zap, CheckCircle2, FileText, Database } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -23,7 +25,7 @@ export default function App() {
     formData.append('file', selectedFile);
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/predict', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/predict`, {
         method: 'POST',
         body: formData,
       });

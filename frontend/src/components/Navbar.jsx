@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Leaf, Activity, CheckCircle, AlertTriangle } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 export default function Navbar({ activeTab, setActiveTab }) {
   const [apiStatus, setApiStatus] = useState('checking');
 
   useEffect(() => {
     const checkApi = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/v1/health');
+        const res = await fetch(`${API_BASE_URL}/api/v1/health`);
         if (res.ok) {
           const data = await res.json();
           setApiStatus(data.model_loaded ? 'online' : 'no-model');

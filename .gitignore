@@ -1,4 +1,119 @@
+# ===== Training Dataset Folders (NOT needed for deployment) =====
+# These contain 87,000+ images and are GBs in size
 test/
 train/
 valid/
+
+# ===== Jupyter Notebooks (NOT needed for deployment) =====
+*.ipynb
+.ipynb_checkpoints/
+
+# ===== Training / Optimization utility scripts (not needed for deployment) =====
+apply_batch_norm.py
+apply_optimizations.py
+apply_rescaling.py
+apply_transfer_learning.py
+run_val_test.py
+test_leaf_val.py
+training_hist.json
+test_results.txt
+main_requirements.txt
+requirement.txt
+
+# ===== Debug / temp backend scripts =====
+backend/daemon_starter.py
+backend/debug_runner.py
+backend/run_server.py
+backend/test_app.py
+backend/err.txt
+backend/out.txt
+backend/server.log
+backend/backend.log
+backend/debug_err.txt
+
+# ===== Test / temp images =====
+Background_image.jpeg
+image.png
+
+# ===== Duplicate model file =====
 trained_model.keras
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ===== Virtual Environments =====
+venv/
+.venv/
+env/
+.env/
+
+# ===== Environment Variables =====
+.env
+.env.local
+.env.production
+.env.*.local
+
+# ===== TensorFlow / ML =====
+# DO NOT ignore .keras files (we need to commit the model)
+*.h5
+*.ckpt
+*.ckpt.*
+checkpoint
+*.tfrecord
+logs/
+runs/
+
+# ===== Notebooks =====
+.ipynb_checkpoints/
+
+# ===== Node / Frontend =====
+node_modules/
+dist/
+frontend/dist/
+frontend/.env.local
+frontend/.env.production
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===== IDEs =====
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== macOS =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V7
+.Trashes
+Icon?
+Thumbs.db
+
+# ===== Render / Docker =====
+*.log
+
+# ===== Test artifacts =====
+test_results.txt
+backend/out.txt
+backend/err.txt
+backend/backend_out.log
+backend/server.log
+backend/debug_err.txt
+backend/backend.log

@@ -1,7 +1,11 @@
 import os
 from fastapi import APIRouter, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
-from backend.app.services.model_service import model_service, CLASS_NAMES
+
+try:
+    from backend.app.services.model_service import model_service, CLASS_NAMES
+except ImportError:
+    from app.services.model_service import model_service, CLASS_NAMES
 
 router = APIRouter()
 

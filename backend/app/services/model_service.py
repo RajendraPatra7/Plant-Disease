@@ -208,13 +208,19 @@ class ModelService:
         # Do not load model at import time (Lazy loading)
 
     def _find_model_path(self):
-        # Resolve path relative to backend root or parent workspace root
+        # 1. Check MODEL_PATH env variable (can be set in Render dashboard)
+        env_path = os.environ.get("MODEL_PATH")
+        if env_path and os.path.exists(env_path):
+            return env_path
+
+        # 2. Resolve relative to project structure
+        # backend/app/services/ -> ../../.. = project root
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
         possible_paths = [
-            os.path.join(base_dir, 'best_model_optimized.keras'),
+            os.path.join(base_dir, 'best_model_optimized.keras'),   # repo root (local + Docker)
             os.path.join(base_dir, 'trained_model.keras'),
+            '/app/best_model_optimized.keras',                        # Render Docker root
             os.path.join(os.getcwd(), 'best_model_optimized.keras'),
-            os.path.join(os.getcwd(), '..', 'best_model_optimized.keras'),
         ]
         for path in possible_paths:
             if os.path.exists(path):
