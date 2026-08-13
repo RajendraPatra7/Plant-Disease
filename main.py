@@ -376,10 +376,10 @@ st.markdown(
 
 @st.cache_resource
 def load_model():
-    if not os.path.exists('trained_model.keras'):
-        st.error("Model file 'trained_model.keras' not found in the current directory.")
+    if not os.path.exists('best_model_optimized.keras'):
+        st.error("Model file 'best_model_optimized.keras' not found in the current directory.")
         return None
-    return tf.keras.models.load_model('trained_model.keras')
+    return tf.keras.models.load_model('best_model_optimized.keras')
 
 model = load_model()
 
