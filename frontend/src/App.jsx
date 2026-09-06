@@ -84,7 +84,7 @@ export default function App() {
               <div className="feature-card">
                 <div className="feature-icon">🌱</div>
                 <h3>Eco-Friendly</h3>
-                <p>Reduce chemical runoff and promote sustainable farming for SIH 2025</p>
+                <p>Reduce chemical runoff and promote sustainable farming for SIH 2026</p>
               </div>
             </div>
 
@@ -170,7 +170,7 @@ export default function App() {
                 📖 Project Overview
               </h3>
               <p style={{ color: '#e8f5e9', fontSize: '1.05rem', lineHeight: '1.8' }}>
-                Smart Spray X is an AI solution developed for <strong>Smart India Hackathon (SIH) 2025</strong> aimed at Precision Agriculture.
+                Smart Spray X is an AI solution developed for <strong>Smart India Hackathon (SIH) 2026</strong> aimed at Precision Agriculture.
                 By detecting plant leaf infections early and estimating targeted treatment actions, the system helps farmers minimize chemical application,
                 reduce operational expenses, and preserve soil health.
               </p>
@@ -207,7 +207,7 @@ export default function App() {
       </main>
 
       <footer className="footer">
-        <p>Smart Spray X — Decoupled FastAPI + React Architecture © 2026 | Built with ❤️ for SIH 2025</p>
+        <p>Smart Spray X — Decoupled FastAPI + React Architecture © 2026 | Built with ❤️ for SIH 2026</p>
       </footer>
     </div>
   );
