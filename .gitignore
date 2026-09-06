@@ -1,42 +1,17 @@
-# ===== Training Dataset Folders (NOT needed for deployment) =====
+# ===== Training Dataset Folders =====
 # These contain 87,000+ images and are GBs in size
 test/
 train/
 valid/
 
-# ===== Jupyter Notebooks (NOT needed for deployment) =====
-*.ipynb
+# ===== Checkpoints & Temp Logs =====
 .ipynb_checkpoints/
-
-# ===== Training / Optimization utility scripts (not needed for deployment) =====
-apply_batch_norm.py
-apply_optimizations.py
-apply_rescaling.py
-apply_transfer_learning.py
-run_val_test.py
-test_leaf_val.py
-training_hist.json
-test_results.txt
-main_requirements.txt
-requirement.txt
-
-# ===== Debug / temp backend scripts =====
-backend/daemon_starter.py
-backend/debug_runner.py
-backend/run_server.py
-backend/test_app.py
 backend/err.txt
 backend/out.txt
 backend/server.log
 backend/backend.log
 backend/debug_err.txt
 
-# ===== Test / temp images =====
-Background_image.jpeg
-image.png
-
-# ===== Duplicate model file =====
-trained_model.keras
 
 # ===== Python =====
 __pycache__/
@@ -91,7 +66,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # ===== IDEs =====
-.vscode/settings.json
+.vscode/
+**/.vscode/
 .idea/
 *.swp
 *.swo
