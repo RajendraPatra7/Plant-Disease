@@ -249,8 +249,11 @@ class ModelService:
 
     def validate_leaf_image(self, pil_image: Image.Image, predictions: np.ndarray):
         """
-        Validates if an uploaded image is a legitimate plant leaf using pure NumPy HSV foliage color analysis
-        and Softmax confidence & margin thresholding.
+        Validates if an uploaded image is a legitimate plant leaf using multiple heuristics:
+        - HSV foliage color analysis
+        - Confidence and margin thresholding
+        - Texture/uniformity checks
+        - Shape and aspect ratio analysis
         """
         img_rgb = np.array(pil_image.convert('RGB'))
         h, s, v = rgb_to_hsv_numpy(img_rgb)
@@ -266,21 +269,53 @@ class ModelService:
         foliage_pixels = float(np.sum(foliage_mask))
         foliage_ratio = foliage_pixels / total_pixels
 
+        # Check 1: Detect solid green backgrounds (e.g., dog on green screen)
+        # Only apply when the ENTIRE image is dominated by uniform green (>70% coverage)
+        if foliage_ratio > 0.70:  # More than 70% of image is green/brown
+            green_pixels = img_rgb[mask_green]
+            if len(green_pixels) > 1000:
+                # Check if the green is extremely uniform (solid background)
+                green_std = np.std(green_pixels[:, 1])  # Green channel variance
+                # Solid backgrounds: variance < 10, Real leaves: variance > 15
+                if green_std < 10.0 and foliage_ratio > 0.80:
+                    return False, f"Image appears to be a solid colored background, not a plant leaf. (Color variance: {round(green_std, 1)} is too uniform for {round(foliage_ratio * 100, 1)}% coverage)."
+
+        # Check 2: Aspect ratio analysis - detect non-leaf shapes
+        # Find bounding box of foliage regions
+        foliage_rows = np.any(foliage_mask, axis=1)
+        foliage_cols = np.any(foliage_mask, axis=0)
+
+        if np.any(foliage_rows) and np.any(foliage_cols):
+            y_min, y_max = np.where(foliage_rows)[0][[0, -1]]
+            x_min, x_max = np.where(foliage_cols)[0][[0, -1]]
+
+            bbox_height = y_max - y_min + 1
+            bbox_width = x_max - x_min + 1
+            aspect_ratio = max(bbox_width, bbox_height) / max(min(bbox_width, bbox_height), 1)
+
+            # Leaves typically have aspect ratio between 0.3 and 4.0
+            # Very elongated (>5) or very square (<0.2) objects are suspicious
+            if aspect_ratio > 6.0:
+                return False, f"Unusual object shape detected (aspect ratio: {round(aspect_ratio, 1)}). This doesn't appear to be a plant leaf."
+
         # Probability Confidence & Top-2 Margin Checks
         sorted_probs = np.sort(predictions[0])[::-1]
         top1 = float(sorted_probs[0])
         top2 = float(sorted_probs[1]) if len(sorted_probs) > 1 else 0.0
         margin = top1 - top2
 
-        # Rejection Criteria
-        if foliage_ratio < 0.12:
-            return False, f"The uploaded image does not appear to be a plant leaf. (Foliage color coverage: {round(foliage_ratio * 100, 1)}% is below 12% minimum threshold)."
+        # Check 3: Reject images with very low foliage coverage
+        if foliage_ratio < 0.08:
+            return False, f"The uploaded image does not appear to be a plant leaf. (Foliage color coverage: {round(foliage_ratio * 100, 1)}% is below 8% minimum threshold)."
 
-        if top1 < 0.65:
-            return False, f"Uncertain diagnosis. Confidence score ({round(top1 * 100, 1)}%) is below 65% minimum threshold for a valid crop leaf."
+        # Check 4: CRITICAL - Reject low confidence predictions (likely out-of-distribution)
+        # If the model can't confidently classify ANY class, the image probably isn't from the training domain
+        if top1 < 0.40:
+            return False, f"Very low confidence ({round(top1 * 100, 1)}%). This image doesn't match any plant disease in the training dataset. Please ensure you're uploading a clear photo of a plant leaf, not other objects."
 
-        if margin < 0.10:
-            return False, f"Ambiguous image. Prediction is split across multiple classes (Confidence margin: {round(margin * 100, 1)}%). Please upload a clearer leaf photo."
+        # Check 5: Margin check for ambiguous predictions
+        if margin < 0.08:
+            return False, f"Ambiguous prediction split across multiple classes (margin: {round(margin * 100, 1)}%). Please upload a clearer, well-lit leaf photo."
 
         return True, "Valid plant leaf image."
 
@@ -314,6 +349,12 @@ class ModelService:
         pil_image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
         resized_image = pil_image.resize((128, 128))
         input_arr = np.array(resized_image, dtype=np.float32)
+
+        # CRITICAL: Apply the same rescaling as training (MobileNetV2 expects [-1, 1] range)
+        # The model includes Rescaling(1./127.5, offset=-1) layer, but we need to pass [0, 255] values
+        # So the input should remain [0, 255] - the model's Rescaling layer will handle it
+        # Actually, checking the model - it HAS the Rescaling layer, so we just pass [0, 255]
+
         input_arr = np.expand_dims(input_arr, axis=0)  # Shape: (1, 128, 128, 3)
 
         # Run inference
