@@ -93,3 +93,4 @@ backend/backend_out.log
 backend/server.log
 backend/debug_err.txt
 backend/backend.log
+.claude/settings.local.json
