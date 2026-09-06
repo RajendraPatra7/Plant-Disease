@@ -1,6 +1,18 @@
 import React from 'react';
 import { CheckCircle2, AlertTriangle, Droplets, ShieldCheck, Info } from 'lucide-react';
 
+// Map severity levels to colors matching the reference design
+function getSeverityColor(level) {
+  const colors = {
+    'very_low': '#52b788',   // green
+    'mild': '#ffa500',       // orange
+    'moderate': '#ff8c00',   // dark orange
+    'severe': '#ff6b6b',     // red-orange
+    'critical': '#dc3545'    // red
+  };
+  return colors[level] || '#ffa500';
+}
+
 export default function ResultCard({ result }) {
   if (!result) return null;
 
@@ -27,10 +39,34 @@ export default function ResultCard({ result }) {
           </h2>
         </div>
 
-        <div style={{ textAlignment: 'right', background: 'rgba(26, 77, 46, 0.5)', padding: '0.8rem 1.4rem', borderRadius: '12px', border: '1px solid var(--border-emerald)' }}>
-          <div style={{ fontSize: '0.85rem', color: '#95d5b2' }}>Model Confidence</div>
-          <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#52b788' }}>
-            {confidence_percentage}%
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          {/* Disease Severity Card */}
+          {result.severity && result.severity.available && (
+            <div style={{ background: 'rgba(26, 77, 46, 0.5)', padding: '0.8rem 1.4rem', borderRadius: '12px', border: '1px solid var(--border-emerald)' }}>
+              <div style={{ fontSize: '0.85rem', color: '#95d5b2', display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.3rem' }}>
+                🌿 Disease Severity
+              </div>
+              <div style={{ fontSize: '1.35rem', fontWeight: '700', color: getSeverityColor(result.severity.level), marginBottom: '0.4rem' }}>
+                {result.severity.label} · {result.severity.score}%
+              </div>
+              <div style={{ background: 'rgba(255, 255, 255, 0.1)', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
+                <div style={{
+                  background: getSeverityColor(result.severity.level),
+                  height: '100%',
+                  width: `${result.severity.score}%`,
+                  borderRadius: '3px',
+                  transition: 'width 1s ease-in-out'
+                }} />
+              </div>
+            </div>
+          )}
+
+          {/* Model Confidence Card */}
+          <div style={{ background: 'rgba(26, 77, 46, 0.5)', padding: '0.8rem 1.4rem', borderRadius: '12px', border: '1px solid var(--border-emerald)' }}>
+            <div style={{ fontSize: '0.85rem', color: '#95d5b2' }}>Model Confidence</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#52b788' }}>
+              {confidence_percentage}%
+            </div>
           </div>
         </div>
       </div>

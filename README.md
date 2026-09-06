@@ -99,9 +99,72 @@ npm run dev
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/v1/health` | Health check + model status |
-| `POST` | `/api/v1/predict` | Upload leaf image → disease prediction |
+| `POST` | `/api/v1/predict` | Upload leaf image → disease prediction + severity analysis |
 | `GET` | `/api/v1/classes` | List all 38 disease classes |
 | `GET` | `/docs` | Swagger API documentation |
+
+### Disease Severity Analysis
+
+`POST /api/v1/predict` now returns a structured `severity` object alongside the
+existing prediction fields. Severity estimates **how much of the leaf is
+visibly affected** (not how confident the classifier is), derived from the
+image itself:
+
+```json
+{
+  "is_valid_leaf": true,
+  "crop": "Apple",
+  "disease": "Cedar Rust",
+  "status": "Diseased",
+  "confidence_percentage": 94.0,
+  "recommendations": { "...": "..." },
+  "severity": {
+    "available": true,
+    "score": 67,
+    "label": "Severe",
+    "level": "severe",
+    "affected_area_percentage": 67.2,
+    "affected_regions": 2,
+    "largest_region_fraction": 0.81,
+    "confidence": 0.91,
+    "explanation": "An estimated 67.2% of the leaf area shows visible disease symptoms (necrotic/yellow tissue or pale mildew). Symptoms are spread across 2 separate regions."
+  }
+}
+```
+
+**How the score is computed** (`backend/app/services/severity_service.py`):
+
+1. **Symptom segmentation** — pure NumPy HSV analysis (the same color bands the
+   leaf validator uses) separates healthy-green foliage from necrotic/yellow
+   tissue and pale mildew patches.
+2. **Affected area** = weighted symptom pixels ÷ total foliage pixels → a
+   percentage of the *leaf*, not the whole image.
+3. **Region analysis** — connected components on the symptom mask report how
+   many separate lesions exist and the share held by the largest one.
+4. **Model verdict gate** — a `Healthy` classification discounts the measured
+   area (healthy leaves naturally show veins/edges/senescence that color
+   analysis can't fully separate from disease); a `Diseased` classification
+   reports it directly.
+5. **Severity confidence** (separate from the score) reflects trust in the
+   estimate: diagnosis confidence, top-2 margin, foliage coverage, and whether
+   symptoms were actually measurable.
+
+**Severity scale** (configurable via `SEVERITY_THRESHOLDS`):
+
+| Score | Label |
+|---|---|
+| 0–20 | Very Low |
+| 21–40 | Mild |
+| 41–60 | Moderate |
+| 61–80 | Severe |
+| 81–100 | Critical |
+
+**Limitations** — the CNN is a classifier, not a segmenter, so affected area is
+*estimated from color*, not measured by the network. Diseases with
+shape-based or very subtle symptoms (early leaf curl, mosaic mottling) are
+under-estimated, and color segmentation cannot separate true symptoms from
+sunburn, dirt, or lighting artifacts. When symptoms cannot be measured the
+module returns `"available": false` rather than fabricating a score.
 
 ## 🧠 Model Architecture
 - **Input Layer**: 128×128 RGB images
@@ -114,10 +177,11 @@ npm run dev
 1. **Upload**: Drag & drop a leaf image on the React frontend
 2. **Validate**: HSV foliage analysis rejects non-leaf images (< 12% foliage coverage)
 3. **Predict**: CNN classifies the disease with confidence scoring
-4. **Recommend**: Spot-spray pesticide recommendation displayed
+4. **Assess severity**: HSV symptom segmentation + region analysis estimate the affected leaf area and infection level (Very Low → Critical)
+5. **Recommend**: Spot-spray pesticide recommendation displayed
 
 ## 🔮 Future Roadmap
-- [ ] **Severity Estimation**: Quantifying infection level (Mild/Moderate/Severe) for precise pesticide dosage
+- [x] **Severity Estimation**: Quantifying infection level (Very Low/Mild/Moderate/Severe/Critical) for precise pesticide dosage
 - [ ] **Hardware Integration**: Connecting with nozzle control systems for automated drones/sprayers
 - [ ] **Multilingual Support**: Adding regional languages for wider accessibility across India
 - [ ] **Offline Mode**: PWA support for areas with limited connectivity

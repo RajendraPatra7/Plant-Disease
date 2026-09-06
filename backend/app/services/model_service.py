@@ -8,6 +8,13 @@ from PIL import Image
 # TensorFlow is imported lazily inside load_model() to avoid macOS memory pressure kill
 tf = None
 
+# Severity analysis lives in a separate module (pure NumPy + Pillow, no TF).
+# Imported defensively so that a severity failure can never break prediction.
+try:
+    from backend.app.services.severity_service import compute_severity
+except ImportError:
+    from app.services.severity_service import compute_severity
+
 CLASS_NAMES = [
     'Apple Leaf - Apple Scab',
     'Apple Leaf - Black Rot',
@@ -326,6 +333,11 @@ class ModelService:
         result_idx = int(np.argmax(predictions[0]))
         confidence = float(predictions[0][result_idx])
 
+        # Top-1 / Top-2 margin — how separated the winning class is. Used by
+        # the severity module to weight the trustworthiness of the estimate.
+        sorted_probs = np.sort(predictions[0])[::-1]
+        margin = float(sorted_probs[0]) - (float(sorted_probs[1]) if len(sorted_probs) > 1 else 0.0)
+
         raw_class = CLASS_NAMES[result_idx] if result_idx < len(CLASS_NAMES) else "Unknown"
 
         # Parse crop and disease status
@@ -342,6 +354,11 @@ class ModelService:
 
         recommendations = self.get_pesticide_info(raw_class)
 
+        # Estimate disease severity from image color analysis + the diagnosis.
+        # Any failure here is non-fatal: the prediction is still returned,
+        # with severity flagged as unavailable.
+        severity = self._estimate_severity(pil_image, status=status, confidence=confidence, margin=margin, disease=disease_name)
+
         return {
             "is_valid_leaf": True,
             "class_index": result_idx,
@@ -351,8 +368,29 @@ class ModelService:
             "status": status,
             "confidence": round(confidence, 4),
             "confidence_percentage": round(confidence * 100, 2),
-            "recommendations": recommendations
+            "recommendations": recommendations,
+            "severity": severity
         }
+
+    def _estimate_severity(self, pil_image, *, status, confidence, margin, disease):
+        """Wrap severity analysis so unexpected errors degrade gracefully.
+
+        Returns a severity dict (see ``severity_service.compute_severity``),
+        or an ``available: False`` dict when severity cannot be assessed.
+        """
+        try:
+            return compute_severity(
+                pil_image,
+                status=status,
+                confidence=confidence,
+                margin=margin,
+                disease=disease,
+            )
+        except Exception as e:  # pragma: no cover - defensive fallback
+            return {
+                "available": False,
+                "explanation": f"Severity could not be computed: {type(e).__name__}: {e}",
+            }
 
 
 # Singleton instance
